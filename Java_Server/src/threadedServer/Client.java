@@ -11,20 +11,80 @@ import java.net.*;
  */
 public class Client {
 
-	public static void main() throws IOException, ClassNotFoundException {
-		try (
-				// On se connecte au serveur
-				Socket s = new Socket("localhost", 8080);) {
+	// attributes
+	private String name;
+	private String ip;
+	private int port;
+	private String protocol;
 
-			// On récupère les flux d'entrée et de sortie
-			InputStream in = s.getInputStream();
-			OutputStream out = s.getOutputStream();
-			ObjectInputStream ois = new ObjectInputStream(in);
-			ObjectOutputStream oos = new ObjectOutputStream(out);
-			Integer I = (Integer) ois.readObject();
+	public static void main(String[] args) {
+		Client client = new Client("Server", "localhost", 8080, "HTTP");
+
+		client.display();
+		client.send();
+	}
+
+	public Client(String name, String ip, int port, String protocol) {
+		this.setName(name);
+		this.setIp(ip);
+		this.setPort(port);
+		this.setProtocol(protocol);
+	}
+
+	// getters and setters
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getIp() {
+		return ip;
+	}
+
+	public void setIp(String ip) {
+		this.ip = ip;
+	}
+
+	public int getPort() {
+		return port;
+	}
+
+	public void setPort(int port) {
+		this.port = port;
+	}
+
+	public String getProtocol() {
+		return protocol;
+	}
+
+	public void setProtocol(String protocol) {
+		this.protocol = protocol;
+	}
+
+	// methods
+
+	private void display() {
+		System.out.println("Server's name: " + this.getName());
+		System.out.println("Server's ip: " + this.getIp());
+		System.out.println("Server's port: " + this.getPort());
+		System.out.println("Server's protocol: " + this.getProtocol());
+	}
+
+	private void send() {
+		try {
+			Socket socket = new Socket(this.getIp(), this.port);
+
+			OutputStream outStream = socket.getOutputStream();
+			outStream.write("Hello".getBytes());
+
+			outStream.close();
+			socket.close();
 
 		} catch (IOException e) {
-			System.err.println(e.getMessage());
+			System.out.println(e);
 		}
 	}
 

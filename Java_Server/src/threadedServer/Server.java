@@ -13,28 +13,99 @@ import java.net.*;
 
 public class Server {
 
-	public static void main() throws IOException, ClassNotFoundException {
-		try (
-				// écoute sur le port 8080
-				ServerSocket listen = new ServerSocket(8080)) {
+	// attributes
+	private String name;
+	private String ip;
+	private int port;
+	private String protocol;
 
-			// Accepte les demandes de connexion
-			Socket s = listen.accept();
+	public static void main(String[] args) {
+		Server server = new Server("Server", "localhost", 8080, "HTTP");
 
-			// On récupère les flux d'entrée et de sortie
-			InputStream in = s.getInputStream();
-			OutputStream out = s.getOutputStream();
-			ObjectInputStream ois = new ObjectInputStream(in);
-			ObjectOutputStream oos = new ObjectOutputStream(out);
+		server.display();
+		server.listen();
+	}
 
-			// On envoie un objet
-			oos.writeObject("Hello World");
+	public Server(String name, String ip, int port, String protocol) {
+		this.setName(name);
+		this.setIp(ip);
+		this.setPort(port);
+		this.setProtocol(protocol);
+	}
 
-			// On ferme la connexion
-			s.close();
+	// getters and setters
+	public String getName() {
+		return name;
+	}
 
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getIp() {
+		return ip;
+	}
+
+	public void setIp(String ip) {
+		this.ip = ip;
+	}
+
+	public int getPort() {
+		return port;
+	}
+
+	public void setPort(int port) {
+		this.port = port;
+	}
+
+	public String getProtocol() {
+		return protocol;
+	}
+
+	public void setProtocol(String protocol) {
+		this.protocol = protocol;
+	}
+
+	// Methods
+
+	// display the server's informations
+	public void display() {
+		System.out.println("Server's name: " + this.getName());
+		System.out.println("Server's ip: " + this.getIp());
+		System.out.println("Server's port: " + this.getPort());
+		System.out.println("Server's protocol: " + this.getProtocol());
+	}
+
+	// listening to clients
+	public void listen() {
+		try {
+			while (true) {
+				ServerSocket serverSocket = new ServerSocket(this.port);
+				System.out.println("Server is listening on port " + this.getPort());
+				Socket socket = serverSocket.accept();
+				System.out.println("Client connected");
+
+				InputStream input = socket.getInputStream();
+				OutputStream output = socket.getOutputStream();
+
+				// buffer
+				byte[] buffer = new byte[1024];
+				int octets = input.read(buffer);
+				String message = new String(buffer, 0, octets);
+				System.out.println("Message received: " + message);
+
+				// send a message to the client
+				String response = "Server : " + this.name;
+				output.write(response.getBytes());
+
+				// close the socket
+				socket.close();
+				serverSocket.close();
+
+			}
 		} catch (IOException e) {
-			System.err.println(e.getMessage());
+			e.printStackTrace();
 		}
 	}
+
 }
