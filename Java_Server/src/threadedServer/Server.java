@@ -11,10 +11,10 @@ import java.net.*;
  * @version 1.0
  */
 
-public class Server {
+public class Server extends Thread {
 
 	// attributes
-	private String name;
+	private String servName;
 	private String ip;
 	private int port;
 	private String protocol;
@@ -34,12 +34,12 @@ public class Server {
 	}
 
 	// getters and setters
-	public String getName() {
-		return name;
+	public String getServName() {
+		return servName;
 	}
 
-	public void setName(String name) {
-		this.name = name;
+	public void setServName(String name) {
+		this.servName = name;
 	}
 
 	public String getIp() {
@@ -85,6 +85,10 @@ public class Server {
 				Socket socket = serverSocket.accept();
 				System.out.println("Client connected");
 
+				// create a new thread for each client
+				Thread thread = new Thread();
+				thread.start();
+
 				InputStream input = socket.getInputStream();
 				OutputStream output = socket.getOutputStream();
 
@@ -95,7 +99,7 @@ public class Server {
 				System.out.println("Message received: " + message);
 
 				// send a message to the client
-				String response = "Server : " + this.name;
+				String response = "Server : " + this.servName;
 				output.write(response.getBytes());
 
 				// close the socket
