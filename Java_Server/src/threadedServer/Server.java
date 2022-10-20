@@ -1,15 +1,12 @@
 /**
- * 
+ * @author Théo FIGINI
+ * @version 1.0
  */
+
 package threadedServer;
 
 import java.io.*;
 import java.net.*;
-
-/**
- * @author Théo FIGINI
- * @version 1.0
- */
 
 // Server class
 class Server {

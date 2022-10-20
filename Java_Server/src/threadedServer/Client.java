@@ -1,15 +1,12 @@
 /**
- * 
+ * @author Théo FIGINI
  */
+
 package threadedServer;
 
 import java.io.*;
 import java.net.*;
 import java.util.*;
-
-/**
- * @author Théo FIGINI
- */
 
 // Client Class
 public class Client {
