@@ -11,105 +11,95 @@ import java.net.*;
  * @version 1.0
  */
 
-public class Server extends Thread {
-
-	// attributes
-	private String servName;
-	private String ip;
-	private int port;
-	private String protocol;
-
+// Server class
+class Server {
 	public static void main(String[] args) {
-		Server server = new Server("Server", "localhost", 8080, "HTTP");
+		ServerSocket server = null;
 
-		server.display();
-		server.listen();
-	}
-
-	public Server(String name, String ip, int port, String protocol) {
-		this.setName(name);
-		this.setIp(ip);
-		this.setPort(port);
-		this.setProtocol(protocol);
-	}
-
-	// getters and setters
-	public String getServName() {
-		return servName;
-	}
-
-	public void setServName(String name) {
-		this.servName = name;
-	}
-
-	public String getIp() {
-		return ip;
-	}
-
-	public void setIp(String ip) {
-		this.ip = ip;
-	}
-
-	public int getPort() {
-		return port;
-	}
-
-	public void setPort(int port) {
-		this.port = port;
-	}
-
-	public String getProtocol() {
-		return protocol;
-	}
-
-	public void setProtocol(String protocol) {
-		this.protocol = protocol;
-	}
-
-	// Methods
-
-	// display the server's informations
-	public void display() {
-		System.out.println("Server's name: " + this.getName());
-		System.out.println("Server's ip: " + this.getIp());
-		System.out.println("Server's port: " + this.getPort());
-		System.out.println("Server's protocol: " + this.getProtocol());
-	}
-
-	// listening to clients
-	public void listen() {
 		try {
+
+			// server is listening on port "8080"
+			server = new ServerSocket(8080);
+			server.setReuseAddress(true);
+
+			// running infinite loop for geting client request
 			while (true) {
-				ServerSocket serverSocket = new ServerSocket(this.port);
-				System.out.println("Server is listening on port " + this.getPort());
-				Socket socket = serverSocket.accept();
-				System.out.println("Client connected");
 
-				// create a new thread for each client
-				Thread thread = new Thread();
-				thread.start();
+				// returns new socket
+				Socket client = server.accept();
+				// returns remote IP address to which the socket is connected or returns null is
+				// the socket is not connected
+				InetAddress addy = client.getInetAddress();
+				// returns raw IP address in a string format
+				String remoteIp = addy.getHostAddress();
 
-				InputStream input = socket.getInputStream();
-				OutputStream output = socket.getOutputStream();
+				// Displaying that new client is connected to server
+				System.out.println("New client connected" + addy + remoteIp);
 
-				// buffer
-				byte[] buffer = new byte[1024];
-				int octets = input.read(buffer);
-				String message = new String(buffer, 0, octets);
-				System.out.println("Message received: " + message);
+				// create a new thread object
+				ClientHandler clientSock = new ClientHandler(client);
 
-				// send a message to the client
-				String response = "Server : " + this.servName;
-				output.write(response.getBytes());
-
-				// close the socket
-				socket.close();
-				serverSocket.close();
-
+				// This thread will handle the client seperately
+				new Thread(clientSock).start();
 			}
 		} catch (IOException e) {
 			e.printStackTrace();
+		} finally {
+			if (server != null) {
+				try {
+					server.close();
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
 		}
+	}
+
+	// ClientHandler class
+	private static class ClientHandler implements Runnable {
+
+		private final Socket clientSocket;
+
+		// Construtor
+		public ClientHandler(Socket socket) {
+			this.clientSocket = socket;
+		}
+
+		public void run() {
+			PrintWriter out = null;
+			BufferedReader in = null;
+
+			try {
+
+				// get the outputstream of client
+				out = new PrintWriter(clientSocket.getOutputStream(), true);
+
+				// get the inputStream of client
+				in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+
+				String line;
+				while ((line = in.readLine()) != null) {
+
+					// Writing the recieved message from client
+					System.out.printf(" Sent from the client: %s\n", line);
+					out.println(line);
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			} finally {
+				try {
+					if (out != null) {
+						out.close();
+					}
+					if (in != null) {
+						in.close();
+					}
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+
 	}
 
 }

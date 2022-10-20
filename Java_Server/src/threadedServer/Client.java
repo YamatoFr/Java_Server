@@ -5,86 +5,49 @@ package threadedServer;
 
 import java.io.*;
 import java.net.*;
+import java.util.*;
 
 /**
  * @author Théo FIGINI
  */
+
+// Client Class
 public class Client {
 
-	// attributes
-	private String name;
-	private String ip;
-	private int port;
-	private String protocol;
-
+	// drive code
 	public static void main(String[] args) {
-		Client client = new Client("Server", "localhost", 8080, "HTTP");
+		// established a connection by provided host and port number
+		try (Socket socket = new Socket("localhost", 8080)) {
 
-		client.display();
-		client.send();
-	}
+			// writing to server
+			PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
 
-	public Client(String name, String ip, int port, String protocol) {
-		this.setName(name);
-		this.setIp(ip);
-		this.setPort(port);
-		this.setProtocol(protocol);
-	}
+			// reading from server
+			BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
-	// getters and setters
-	public String getName() {
-		return name;
-	}
+			// object of scanner class
+			Scanner sc = new Scanner(System.in);
+			String line = null;
 
-	public void setName(String name) {
-		this.name = name;
-	}
+			while (!"exit".equalsIgnoreCase(line)) {
 
-	public String getIp() {
-		return ip;
-	}
+				// reading from user
+				line = sc.nextLine();
 
-	public void setIp(String ip) {
-		this.ip = ip;
-	}
+				// sending the user input to server
+				out.println(line);
+				// clearing stream
+				out.flush();
 
-	public int getPort() {
-		return port;
-	}
+				// displaying server reply
+				System.out.println("Server replied " + in.readLine());
+			}
 
-	public void setPort(int port) {
-		this.port = port;
-	}
-
-	public String getProtocol() {
-		return protocol;
-	}
-
-	public void setProtocol(String protocol) {
-		this.protocol = protocol;
-	}
-
-	// methods
-
-	private void display() {
-		System.out.println("Server's name: " + this.getName());
-		System.out.println("Server's ip: " + this.getIp());
-		System.out.println("Server's port: " + this.getPort());
-		System.out.println("Server's protocol: " + this.getProtocol());
-	}
-
-	private void send() {
-		try {
-			Socket socket = new Socket(this.getIp(), this.port);
-
-			OutputStream outStream = socket.getOutputStream();
-			outStream.write("Hello".getBytes());
-
-			outStream.close();
-			socket.close();
+			// closing the scanner object
+			sc.close();
 
 		} catch (IOException e) {
-			System.out.println(e);
+			e.printStackTrace();
 		}
 	}
 
