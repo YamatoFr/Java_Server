@@ -48,4 +48,72 @@ public class Client {
 		}
 	}
 
+	// attributes
+	private String name;
+	private String IP;
+	private int port;
+	private String protocole;
+
+	// constructor
+	public Client(String name, String IP, int port, String protocole) {
+		this.name = name;
+		this.IP = IP;
+		this.port = port;
+		this.protocole = protocole;
+	}
+
+	// methods
+	public void displayInfo() {
+		System.out.println("Name: " + this.name);
+		System.out.println("IP: " + this.IP);
+		System.out.println("Port: " + this.port);
+		System.out.println("Protocole: " + this.protocole);
+	}
+
+	public void send(String msg) {
+		// send message to server
+		try {
+			Socket socket = new Socket(this.IP, this.port);
+
+			// output stream
+			OutputStream os = socket.getOutputStream();
+			ObjectOutputStream oos = new ObjectOutputStream(os);
+
+			// send message
+			oos.writeObject(msg);
+			oos.flush();
+
+			// input stream
+			InputStream is = socket.getInputStream();
+			ObjectInputStream ois = new ObjectInputStream(is);
+
+			// message from server
+			String message = (String) ois.readObject();
+			System.out.println("Server: " + message);
+
+			// close streams
+			ois.close();
+			is.close();
+			oos.close();
+			os.close();
+			socket.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	public boolean sendMessage() {
+		Scanner sc = new Scanner(System.in);
+		System.out.println("Enter message: ");
+		String msg = sc.nextLine();
+
+		// exit
+		if (msg.equalsIgnoreCase("exit")) {
+			System.out.println("Exiting...");
+			return true;
+		} else {
+			this.send(msg);
+			return false;
+		}
+	}
 }

@@ -11,89 +11,114 @@ import java.net.*;
 // Server class
 class Server {
 	public static void main(String[] args) {
-		ServerSocket server = null;
+		Server serverZero = new Server("Server 0", "192.168.1.1", 8080, "HTTP");
 
+		serverZero.displayInfo();
+		serverZero.listen();
+	}
+
+	// Attributes
+	protected int serverPort = 8080;
+	protected ServerSocket serverSocket = null;
+	protected boolean stopped = false;
+	protected Thread runningThread = null;
+
+	private String Name;
+	private String Ip;
+	private int Port;
+	private String protocole;
+
+	// Constructor
+	public Server(String name, String ip, int port, String protocole) {
+		this.Name = name;
+		this.Ip = ip;
+		this.Port = port;
+		this.protocole = protocole;
+	}
+
+	// Methods
+	public void displayInfo() {
+		// Displaying server information
+		System.out.println("Name: " + this.Name);
+		System.out.println("IP: " + this.Ip);
+		System.out.println("Port: " + this.Port);
+		System.out.println("Protocole: " + this.protocole);
+	}
+
+	private void openServerSocket() {
 		try {
-
-			// server is listening on port "8080"
-			server = new ServerSocket(8080);
-			server.setReuseAddress(true);
-
-			// running infinite loop for geting client request
-			while (true) {
-
-				// returns new socket
-				Socket client = server.accept();
-				// returns remote IP address to which the socket is connected or returns null is
-				// the socket is not connected
-				InetAddress addy = client.getInetAddress();
-				// returns raw IP address in a string format
-				String remoteIp = addy.getHostAddress();
-
-				// Displaying that new client is connected to server
-				System.out.println("New client connected" + addy + remoteIp);
-
-				// create a new thread object
-				ClientHandler clientSock = new ClientHandler(client);
-
-				// This thread will handle the client seperately
-				new Thread(clientSock).start();
-			}
+			this.serverSocket = new ServerSocket(this.serverPort);
 		} catch (IOException e) {
-			e.printStackTrace();
-		} finally {
-			if (server != null) {
-				try {
-					server.close();
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
+			throw new RuntimeException("Cannot open port " + this.serverPort, e);
 		}
 	}
 
-	// ClientHandler class
-	private static class ClientHandler implements Runnable {
+	private synchronized boolean isStopped() {
+		return this.stopped;
+	}
 
-		private final Socket clientSocket;
+	public void listen() {
+		// listening to port, synchronized
+		synchronized (this) {
+			this.runningThread = Thread.currentThread();
+		}
+		// open server socket
+		openServerSocket();
+		while (!isStopped()) {
+			Socket clientSocket = null;
+			try {
+				clientSocket = this.serverSocket.accept();
+			} catch (IOException e) {
+				if (isStopped()) {
+					System.out.println("Server Stopped.");
+					return;
+				}
+				throw new RuntimeException("Error accepting client connection", e);
+			}
+			new Thread(new ClientHandler(clientSocket, "Multithreaded Server")).start();
+		}
+		System.out.println("Server Stopped.");
+	}
+
+	// ClientHandler class
+	public class ClientHandler implements Runnable {
+
+		protected Socket clientSocket = null;
+		protected String serverText = null;
 
 		// Construtor
-		public ClientHandler(Socket socket) {
+		public ClientHandler(Socket socket, String serverText) {
 			this.clientSocket = socket;
+			this.serverText = serverText;
 		}
 
 		public void run() {
-			PrintWriter out = null;
-			BufferedReader in = null;
-
 			try {
+				// get input and objet input stream
+				InputStream input = clientSocket.getInputStream();
+				ObjectInputStream ois = new ObjectInputStream(input);
 
-				// get the outputstream of client
-				out = new PrintWriter(clientSocket.getOutputStream(), true);
+				// read object
+				String message = (String) ois.readObject();
+				System.out.println(
+						"Message Received: " + message + ". From " + clientSocket.getInetAddress().getHostAddress());
 
-				// get the inputStream of client
-				in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+				// confirm message received
+				OutputStream output = clientSocket.getOutputStream();
+				ObjectOutputStream oos = new ObjectOutputStream(output);
 
-				String line;
-				while ((line = in.readLine()) != null) {
+				// send confirmation
+				oos.writeObject("Message Received");
+				oos.flush();
 
-					// Writing the recieved message from client
-					System.out.printf(" Sent from the client: %s\n", line);
-					out.println(line);
-				}
-			} catch (IOException e) {
+				// close streams
+				ois.close();
+				oos.close();
+
+				// close socket
+				clientSocket.close();
+			} catch (Exception e) {
 				e.printStackTrace();
-			} finally {
-				try {
-					if (out != null) {
-						out.close();
-					}
-					if (in != null) {
-						in.close();
-					}
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
 			}
 		}
 
