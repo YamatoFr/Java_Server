@@ -7,11 +7,12 @@ package threadedServer;
 
 import java.io.*;
 import java.net.*;
+import java.util.*;
 
 // Server class
 class Server {
 	public static void main(String[] args) {
-		Server serverZero = new Server("Server 0", "192.168.1.1", 8080, "HTTP");
+		Server serverZero = new Server("Server 0", "127.0.0.1", 8080, "HTTP");
 
 		serverZero.displayInfo();
 		serverZero.listen();
@@ -23,32 +24,35 @@ class Server {
 	protected boolean stopped = false;
 	protected Thread runningThread = null;
 
-	private String Name;
-	private String Ip;
-	private int Port;
+	private String name;
+	private String ip;
+	private int port;
 	private String protocole;
+
+	private static ArrayList<Object> sentList = new ArrayList<Object>();
+	private static ArrayList<Object> receivedList = new ArrayList<Object>();
 
 	// Constructor
 	public Server(String name, String ip, int port, String protocole) {
-		this.Name = name;
-		this.Ip = ip;
-		this.Port = port;
+		this.name = name;
+		this.ip = ip;
+		this.port = port;
 		this.protocole = protocole;
 	}
 
 	// Methods
 	public void displayInfo() {
 		// Displaying server information
-		System.out.println("Name: " + this.Name);
-		System.out.println("IP: " + this.Ip);
-		System.out.println("Port: " + this.Port);
+		System.out.println("Name: " + this.name);
+		System.out.println("IP: " + this.ip);
+		System.out.println("Port: " + this.port);
 		System.out.println("Protocole: " + this.protocole);
 	}
 
 	private void openServerSocket() {
 		try {
 			this.serverSocket = new ServerSocket(this.serverPort);
-		} catch (IOException e) {
+		} catch (Exception e) {
 			throw new RuntimeException("Cannot open port " + this.serverPort, e);
 		}
 	}
@@ -68,7 +72,7 @@ class Server {
 			Socket clientSocket = null;
 			try {
 				clientSocket = this.serverSocket.accept();
-			} catch (IOException e) {
+			} catch (Exception e) {
 				if (isStopped()) {
 					System.out.println("Server Stopped.");
 					return;
@@ -94,29 +98,34 @@ class Server {
 
 		public void run() {
 			try {
-				// get input and objet input stream
-				InputStream input = clientSocket.getInputStream();
-				ObjectInputStream ois = new ObjectInputStream(input);
+				while (true) {
+					// confirm message received
+					OutputStream output = clientSocket.getOutputStream();
+					ObjectOutputStream oos = new ObjectOutputStream(output);
 
-				// read object
-				String message = (String) ois.readObject();
-				System.out.println(
-						"Message Received: " + message + ". From " + clientSocket.getInetAddress().getHostAddress());
+					// get input and objet input stream
+					InputStream input = clientSocket.getInputStream();
+					ObjectInputStream ois = new ObjectInputStream(input);
 
-				// confirm message received
-				OutputStream output = clientSocket.getOutputStream();
-				ObjectOutputStream oos = new ObjectOutputStream(output);
+					// read object
+					String message = (String) ois.readObject();
+					System.out.println(
+							"Message Received: " + message + ". From "
+									+ clientSocket.getInetAddress().getHostAddress());
 
-				// send confirmation
-				oos.writeObject("Message Received");
-				oos.flush();
+					// send confirmation
+					oos.writeObject("Message Received");
+					oos.flush();
 
-				// close streams
-				ois.close();
-				oos.close();
-
-				// close socket
-				clientSocket.close();
+					// if message is exit, close connection
+					if (message.equalsIgnoreCase("exit")) {
+						ois.close();
+						oos.close();
+						clientSocket.close();
+						System.out.println("Connection closed");
+						break;
+					}
+				}
 			} catch (Exception e) {
 				e.printStackTrace();
 			}

@@ -13,51 +13,22 @@ public class Client {
 
 	// drive code
 	public static void main(String[] args) {
-		// established a connection by provided host and port number
-		try (Socket socket = new Socket("localhost", 8080)) {
+		Client clientZero = new Client("Client 0", "127.0.0.1", 8080, "HTTP");
 
-			// writing to server
-			PrintWriter out = new PrintWriter(socket.getOutputStream(), true);
-
-			// reading from server
-			BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-
-			// object of scanner class
-			Scanner sc = new Scanner(System.in);
-			String line = null;
-
-			while (!"exit".equalsIgnoreCase(line)) {
-
-				// reading from user
-				line = sc.nextLine();
-
-				// sending the user input to server
-				out.println(line);
-				// clearing stream
-				out.flush();
-
-				// displaying server reply
-				System.out.println("Server replied " + in.readLine());
-			}
-
-			// closing the scanner object
-			sc.close();
-
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		clientZero.displayInfo();
+		clientZero.sendMessage();
 	}
 
 	// attributes
 	private String name;
-	private String IP;
+	private String ip;
 	private int port;
 	private String protocole;
 
 	// constructor
-	public Client(String name, String IP, int port, String protocole) {
+	public Client(String name, String ip, int port, String protocole) {
 		this.name = name;
-		this.IP = IP;
+		this.ip = ip;
 		this.port = port;
 		this.protocole = protocole;
 	}
@@ -65,7 +36,7 @@ public class Client {
 	// methods
 	public void displayInfo() {
 		System.out.println("Name: " + this.name);
-		System.out.println("IP: " + this.IP);
+		System.out.println("IP: " + this.ip);
 		System.out.println("Port: " + this.port);
 		System.out.println("Protocole: " + this.protocole);
 	}
@@ -73,7 +44,7 @@ public class Client {
 	public void send(String msg) {
 		// send message to server
 		try {
-			Socket socket = new Socket(this.IP, this.port);
+			Socket socket = new Socket(this.ip, this.port);
 
 			// output stream
 			OutputStream os = socket.getOutputStream();
@@ -97,23 +68,25 @@ public class Client {
 			oos.close();
 			os.close();
 			socket.close();
+
 		} catch (Exception e) {
-			e.printStackTrace();
+			System.out.println("Erreur : " + e.getMessage());
 		}
 	}
 
 	public boolean sendMessage() {
-		Scanner sc = new Scanner(System.in);
-		System.out.println("Enter message: ");
-		String msg = sc.nextLine();
+		try (Scanner sc = new Scanner(System.in)) {
+			System.out.println("Enter message: ");
+			String msg = sc.nextLine();
 
-		// exit
-		if (msg.equalsIgnoreCase("exit")) {
-			System.out.println("Exiting...");
-			return true;
-		} else {
-			this.send(msg);
-			return false;
+			// exit
+			if (msg.equalsIgnoreCase("exit")) {
+				System.out.println("Exiting...");
+				return true;
+			} else {
+				this.send(msg);
+				return false;
+			}
 		}
 	}
 }
