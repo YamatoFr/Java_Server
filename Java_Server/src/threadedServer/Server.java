@@ -21,16 +21,14 @@ class Server {
 	// Attributes
 	protected int serverPort = 8080;
 	protected ServerSocket serverSocket = null;
-	protected boolean stopped = false;
-	protected Thread runningThread = null;
 
 	private String name;
 	private String ip;
 	private int port;
 	private String protocole;
 
-	private static ArrayList<Object> sentList = new ArrayList<Object>();
-	private static ArrayList<Object> receivedList = new ArrayList<Object>();
+	private static ArrayList<Object> sentList = new ArrayList<>();
+	private static ArrayList<Object> receivedList = new ArrayList<>();
 
 	// Constructor
 	public Server(String name, String ip, int port, String protocole) {
@@ -49,88 +47,27 @@ class Server {
 		System.out.println("Protocole: " + this.protocole);
 	}
 
-	private void openServerSocket() {
-		try {
-			this.serverSocket = new ServerSocket(this.serverPort);
-		} catch (Exception e) {
-			throw new RuntimeException("Cannot open port " + this.serverPort, e);
-		}
-	}
-
-	private synchronized boolean isStopped() {
-		return this.stopped;
-	}
-
 	public void listen() {
-		// listening to port, synchronized
-		synchronized (this) {
-			this.runningThread = Thread.currentThread();
-		}
-		// open server socket
-		openServerSocket();
-		while (!isStopped()) {
-			Socket clientSocket = null;
-			try {
-				clientSocket = this.serverSocket.accept();
-			} catch (Exception e) {
-				if (isStopped()) {
-					System.out.println("Server Stopped.");
-					return;
-				}
-				throw new RuntimeException("Error accepting client connection", e);
+		ServerSocket sock;
+
+		try {
+			sock = new ServerSocket(this.port);
+			System.out.println("Server is listening on port " + this.port);
+
+			while (true) {
+				// accept client connection
+				System.out.println("Awaiting for client connection...");
+				Socket client = sock.accept();
+				System.out.println("Client connected.");
+
+				// create new thread
+				ServerThread st = new ServerThread(client, sentList, receivedList);
+				System.out.println("New thread created. Launching thread...");
+				st.start();
 			}
-			new Thread(new ClientHandler(clientSocket, "Multithreaded Server")).start();
+		} catch (IOException e) {
+			e.printStackTrace();
 		}
-		System.out.println("Server Stopped.");
-	}
-
-	// ClientHandler class
-	public class ClientHandler implements Runnable {
-
-		protected Socket clientSocket = null;
-		protected String serverText = null;
-
-		// Construtor
-		public ClientHandler(Socket socket, String serverText) {
-			this.clientSocket = socket;
-			this.serverText = serverText;
-		}
-
-		public void run() {
-			try {
-				while (true) {
-					// confirm message received
-					OutputStream output = clientSocket.getOutputStream();
-					ObjectOutputStream oos = new ObjectOutputStream(output);
-
-					// get input and objet input stream
-					InputStream input = clientSocket.getInputStream();
-					ObjectInputStream ois = new ObjectInputStream(input);
-
-					// read object
-					String message = (String) ois.readObject();
-					System.out.println(
-							"Message Received: " + message + ". From "
-									+ clientSocket.getInetAddress().getHostAddress());
-
-					// send confirmation
-					oos.writeObject("Message Received");
-					oos.flush();
-
-					// if message is exit, close connection
-					if (message.equalsIgnoreCase("exit")) {
-						ois.close();
-						oos.close();
-						clientSocket.close();
-						System.out.println("Connection closed");
-						break;
-					}
-				}
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-
 	}
 
 }
