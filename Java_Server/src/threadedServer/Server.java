@@ -11,12 +11,6 @@ import java.util.*;
 
 // Server class
 class Server {
-	public static void main(String[] args) {
-		Server serverZero = new Server("Server 0", "127.0.0.1", 8080, "HTTP");
-
-		serverZero.displayInfo();
-		serverZero.listen();
-	}
 
 	// Attributes
 	protected int serverPort = 8080;
@@ -29,6 +23,13 @@ class Server {
 
 	private static ArrayList<Object> sentList = new ArrayList<>();
 	private static ArrayList<Object> receivedList = new ArrayList<>();
+
+	public static void main(String[] args) {
+		Server serverZero = new Server("Server 0", "127.0.0.1", 8080, "HTTP");
+
+		serverZero.displayInfo();
+		serverZero.listen();
+	}
 
 	// Constructor
 	public Server(String name, String ip, int port, String protocole) {
@@ -49,6 +50,12 @@ class Server {
 
 	public void listen() {
 		ServerSocket sock;
+
+		for (int i = 0; i < 5; i++) {
+			Form form = new Form();
+
+			sentList.add(form);
+		}
 
 		try {
 			sock = new ServerSocket(this.port);

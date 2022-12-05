@@ -7,15 +7,15 @@ import java.util.*;
 public class ServerThread extends Thread {
 
 	// attributes
-	private Socket client;
-	ArrayList<Object> listSend;
-	ArrayList<Object> listReceive;
+	public Socket client;
+	ArrayList<Object> sentList;
+	ArrayList<Object> receiveList;
 
 	// constructor
-	public ServerThread(Socket c, ArrayList<Object> ls, ArrayList<Object> lr) {
+	public ServerThread(Socket c, ArrayList<Object> sl, ArrayList<Object> rl) {
 		this.client = c;
-		this.listSend = ls;
-		this.listReceive = lr;
+		this.sentList = sl;
+		this.receiveList = rl;
 	}
 
 	// methods
@@ -29,30 +29,36 @@ public class ServerThread extends Thread {
 			ObjectInputStream ois = new ObjectInputStream(is);
 
 			// lock the list
-			synchronized (listSend) {
+			synchronized (sentList) {
+
 				// check if list is empty
 				// if empty, disconnect client
-				if (listSend.isEmpty()) {
+				if (sentList.isEmpty()) {
+
 					System.out.println("List is empty. Disconnecting client.");
 					this.client.close();
 					this.interrupt();
 				} else {
-					Object obj = listSend.get(listSend.size() - 1);
-					listSend.remove(listSend.get(listSend.size() - 1));
+
+					Object obj = sentList.get(sentList.size() - 1);
+					sentList.remove(sentList.get(sentList.size() - 1));
 					oos.writeObject(obj);
 				}
 			}
 
 			// check if thread is interrupted
 			if (!this.isInterrupted()) {
-				// receive message from client
-				Object obj = ois.readObject();
-				listReceive.add(obj);
+				synchronized (receiveList) {
+					Object obj = ois.readObject();
+					System.out.println("Adding object to list...");
+					receiveList.add(obj);
+				}
 			}
 
 			// close
 			client.close();
 		} catch (IOException | ClassNotFoundException e) {
+
 			e.printStackTrace();
 		}
 	}
