@@ -51,7 +51,7 @@ class Server {
 	public void listen() {
 		ServerSocket sock;
 
-		for (int i = 0; i < 5; i++) {
+		for (int i = 0; i < 6; i++) {
 			Form form = new Form();
 
 			sentList.add(form);

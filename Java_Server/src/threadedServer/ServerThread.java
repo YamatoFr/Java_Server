@@ -50,7 +50,7 @@ public class ServerThread extends Thread {
 			if (!this.isInterrupted()) {
 				synchronized (receiveList) {
 					Object obj = ois.readObject();
-					System.out.println("Adding object to list...");
+					System.out.println("Adding object to list...\n" + obj);
 					receiveList.add(obj);
 				}
 			}
