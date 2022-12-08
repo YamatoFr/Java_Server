@@ -82,7 +82,7 @@ public class GUI extends JPanel {
     }
 
     public static void main(String[] args) {
-        JFrame frame = new JFrame("MyPanel");
+        JFrame frame = new JFrame("Welcome");
         frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         frame.getContentPane().add(new GUI());
         frame.pack();

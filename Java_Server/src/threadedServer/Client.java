@@ -45,142 +45,145 @@ public class Client {
 	}
 
 	public void writing(Object obj) {
-		Scanner sc = new Scanner(System.in);
+		try (Scanner sc = new Scanner(System.in)) {
+			ArrayList<String> primTypes = new ArrayList<>(
+					Arrays.asList("int", "double", "float", "long", "short", "byte",
+							"boolean", "char", "String"));
 
-		ArrayList<String> primTypes = new ArrayList<>(Arrays.asList("int", "double", "float", "long", "short", "byte",
-				"boolean", "char", "String"));
+			Object value = null;
+			String msg = "Invalid input";
 
-		Object value = null;
-		String msg = "Invalid input";
+			for (Field f : obj.getClass().getFields()) {
+				System.out.println(f.getType().getSimpleName() + " : " + f.getName() + "\n");
 
-		for (Field f : obj.getClass().getFields()) {
-			System.out.println(f.getType().getSimpleName() + " : " + f.getName() + "\n");
+				if (primTypes.contains(f.getType().getSimpleName())) {
 
-			if (primTypes.contains(f.getType().getSimpleName())) {
+					System.out.println("Enter the " + f.getName());
+					Boolean invalid;
 
-				System.out.println("Enter the " + f.getName());
-				Boolean invalid;
-
-				switch (f.getType().getSimpleName()) {
-					case "String":
-					case "char":
-						do {
-							invalid = false;
-							try {
-								value = sc.nextLine();
-							} catch (InputMismatchException e) {
-								invalid = true;
-								sc.nextLine();
-								System.out.println(msg);
-							}
-						} while (Boolean.TRUE.equals(invalid));
-						break;
-					case "int":
-					case "Integer":
-						do {
-							invalid = false;
-							try {
-								value = sc.nextInt();
-							} catch (InputMismatchException e) {
-								invalid = true;
-								sc.nextLine();
-								System.out.println(msg);
-							}
-						} while (invalid);
-						break;
-					case "double":
-					case "Double":
-						do {
-							invalid = false;
-							try {
-								value = sc.nextDouble();
-							} catch (InputMismatchException e) {
-								invalid = true;
-								sc.nextLine();
-								System.out.println(msg);
-							}
-						} while (Boolean.TRUE.equals(invalid));
-						break;
-					case "float":
-					case "Float":
-						do {
-							invalid = false;
-							try {
-								value = sc.nextFloat();
-							} catch (InputMismatchException e) {
-								invalid = true;
-								sc.nextLine();
-								System.out.println(msg);
-							}
-						} while (Boolean.TRUE.equals(invalid));
-						break;
-					case "long":
-					case "Long":
-						do {
-							invalid = false;
-							try {
-								value = sc.nextLong();
-							} catch (InputMismatchException e) {
-								invalid = true;
-								sc.nextLine();
-								System.out.println(msg);
-							}
-						} while (Boolean.TRUE.equals(invalid));
-						break;
-					case "short":
-					case "Short":
-						do {
-							invalid = false;
-							try {
-								value = sc.nextShort();
-							} catch (InputMismatchException e) {
-								invalid = true;
-								sc.nextLine();
-								System.out.println(msg);
-							}
-						} while (Boolean.TRUE.equals(invalid));
-						break;
-					case "byte":
-					case "Byte":
-						do {
-							invalid = false;
-							try {
-								value = sc.nextByte();
-							} catch (InputMismatchException e) {
-								invalid = true;
-								sc.nextLine();
-								System.out.println(msg);
-							}
-						} while (Boolean.TRUE.equals(invalid));
-						break;
-					case "boolean":
-					case "Boolean":
-						do {
-							invalid = false;
-							try {
-								value = sc.nextBoolean();
-							} catch (InputMismatchException e) {
-								invalid = true;
-								sc.nextLine();
-								System.out.println(msg);
-							}
-						} while (Boolean.TRUE.equals(invalid));
-						break;
-					default:
-						System.out.println("Error");
-				}
-				try {
-					f.set(obj, value);
-				} catch (IllegalArgumentException | IllegalAccessException e) {
-					e.printStackTrace();
-				}
-			} else {
-				try {
-					writing(f.get(obj));
-				} catch (IllegalArgumentException | IllegalAccessException e) {
-					e.printStackTrace();
+					switch (f.getType().getSimpleName()) {
+						case "String":
+						case "char":
+							do {
+								invalid = false;
+								try {
+									value = sc.nextLine();
+								} catch (InputMismatchException e) {
+									invalid = true;
+									sc.nextLine();
+									System.out.println(msg);
+								}
+							} while (Boolean.TRUE.equals(invalid));
+							break;
+						case "int":
+						case "Integer":
+							do {
+								invalid = false;
+								try {
+									value = sc.nextInt();
+								} catch (InputMismatchException e) {
+									invalid = true;
+									sc.nextLine();
+									System.out.println(msg);
+								}
+							} while (invalid);
+							break;
+						case "double":
+						case "Double":
+							do {
+								invalid = false;
+								try {
+									value = sc.nextDouble();
+								} catch (InputMismatchException e) {
+									invalid = true;
+									sc.nextLine();
+									System.out.println(msg);
+								}
+							} while (Boolean.TRUE.equals(invalid));
+							break;
+						case "float":
+						case "Float":
+							do {
+								invalid = false;
+								try {
+									value = sc.nextFloat();
+								} catch (InputMismatchException e) {
+									invalid = true;
+									sc.nextLine();
+									System.out.println(msg);
+								}
+							} while (Boolean.TRUE.equals(invalid));
+							break;
+						case "long":
+						case "Long":
+							do {
+								invalid = false;
+								try {
+									value = sc.nextLong();
+								} catch (InputMismatchException e) {
+									invalid = true;
+									sc.nextLine();
+									System.out.println(msg);
+								}
+							} while (Boolean.TRUE.equals(invalid));
+							break;
+						case "short":
+						case "Short":
+							do {
+								invalid = false;
+								try {
+									value = sc.nextShort();
+								} catch (InputMismatchException e) {
+									invalid = true;
+									sc.nextLine();
+									System.out.println(msg);
+								}
+							} while (Boolean.TRUE.equals(invalid));
+							break;
+						case "byte":
+						case "Byte":
+							do {
+								invalid = false;
+								try {
+									value = sc.nextByte();
+								} catch (InputMismatchException e) {
+									invalid = true;
+									sc.nextLine();
+									System.out.println(msg);
+								}
+							} while (Boolean.TRUE.equals(invalid));
+							break;
+						case "boolean":
+						case "Boolean":
+							do {
+								invalid = false;
+								try {
+									value = sc.nextBoolean();
+								} catch (InputMismatchException e) {
+									invalid = true;
+									sc.nextLine();
+									System.out.println(msg);
+								}
+							} while (Boolean.TRUE.equals(invalid));
+							break;
+						default:
+							System.out.println("Error");
+					}
+					try {
+						f.set(obj, value);
+					} catch (IllegalArgumentException | IllegalAccessException e) {
+						e.printStackTrace();
+					}
+				} else {
+					try {
+						writing(f.get(obj));
+					} catch (IllegalArgumentException | IllegalAccessException e) {
+						e.printStackTrace();
+					}
 				}
 			}
+		} catch (SecurityException e) {
+			e.printStackTrace();
 		}
 	}
 
