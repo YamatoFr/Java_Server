@@ -1,91 +1,122 @@
 package threadedServer;
 
 import java.awt.*;
+import java.text.NumberFormat;
+import java.util.Vector;
+
 import javax.swing.*;
+import javax.swing.text.NumberFormatter;
 
-public class GUI extends JPanel {
-    private JLabel jcomp1;
-    private JTextField jcomp2;
-    private JTextField jcomp3;
-    private JLabel jcomp4;
-    private JLabel jcomp5;
-    private JLabel jcomp6;
-    private JLabel jcomp7;
-    private JLabel jcomp8;
-    private JTextArea jcomp9;
-    private JTextField jcomp10;
-    private JTextField jcomp11;
-    private JTextField jcomp12;
-    private JTextField jcomp13;
-    private JButton jcomp14;
-    private JLabel jcomp15;
-    private JTextField jcomp16;
+public class GUI {
 
-    public GUI() {
-        // construct components
-        jcomp1 = new JLabel("First name");
-        jcomp2 = new JTextField(5);
-        jcomp3 = new JTextField(5);
-        jcomp4 = new JLabel("Last name");
-        jcomp5 = new JLabel("eMail");
-        jcomp6 = new JLabel("Age");
-        jcomp7 = new JLabel("Birth day");
-        jcomp8 = new JLabel("Birth month");
-        jcomp9 = new JTextArea(5, 5);
-        jcomp10 = new JTextField(5);
-        jcomp11 = new JTextField(5);
-        jcomp12 = new JTextField(5);
-        jcomp13 = new JTextField(5);
-        jcomp14 = new JButton("OK");
-        jcomp15 = new JLabel("Birth year");
-        jcomp16 = new JTextField(5);
+	// Attributes
+	JFrame frame;
+	Container contentPane;
+	JButton validate;
 
-        // adjust size and set layout
-        setPreferredSize(new Dimension(344, 417));
-        setLayout(null);
+	public void init() {
+		frame = new JFrame("Java Server");
+		frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+		frame.setLocationRelativeTo(null);
 
-        // add components
-        add(jcomp1);
-        add(jcomp2);
-        add(jcomp3);
-        add(jcomp4);
-        add(jcomp5);
-        add(jcomp6);
-        add(jcomp7);
-        add(jcomp8);
-        add(jcomp9);
-        add(jcomp10);
-        add(jcomp11);
-        add(jcomp12);
-        add(jcomp13);
-        add(jcomp14);
-        add(jcomp15);
-        add(jcomp16);
+		contentPane = frame.getContentPane();
+		contentPane.setLayout(new BoxLayout(contentPane, BoxLayout.Y_AXIS));
 
-        // set component bounds (only needed by Absolute Positioning)
-        jcomp1.setBounds(15, 15, 100, 25);
-        jcomp2.setBounds(120, 15, 200, 25);
-        jcomp3.setBounds(120, 45, 200, 25);
-        jcomp4.setBounds(15, 45, 100, 25);
-        jcomp5.setBounds(15, 75, 100, 25);
-        jcomp6.setBounds(15, 105, 100, 25);
-        jcomp7.setBounds(15, 135, 100, 25);
-        jcomp8.setBounds(15, 165, 100, 25);
-        jcomp9.setBounds(15, 275, 305, 125);
-        jcomp10.setBounds(120, 75, 200, 25);
-        jcomp11.setBounds(120, 105, 200, 25);
-        jcomp12.setBounds(120, 135, 200, 25);
-        jcomp13.setBounds(120, 165, 200, 25);
-        jcomp14.setBounds(120, 240, 100, 25);
-        jcomp15.setBounds(15, 195, 100, 25);
-        jcomp16.setBounds(120, 195, 200, 25);
-    }
+		validate = new JButton("Validate");
 
-    public static void main(String[] args) {
-        JFrame frame = new JFrame("Welcome");
-        frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
-        frame.getContentPane().add(new GUI());
-        frame.pack();
-        frame.setVisible(true);
-    }
+		frame.setVisible(true);
+	}
+
+	public void showField(String type, String fieldName, JPanel panel) {
+		JLabel label = new JLabel(type + " " + fieldName + " : ");
+
+		JComponent field = null;
+		NumberFormat format = NumberFormat.getNumberInstance();
+		NumberFormatter formatter = new NumberFormatter(format);
+
+		switch (type) {
+			case "String":
+				field = new JTextArea("");
+				((JTextArea) field).setColumns(20);
+				break;
+
+			case "char":
+			case "Character":
+				field = new JTextField("");
+				((JTextField) field).setColumns(20);
+				break;
+
+			case "int":
+			case "Integer":
+
+				formatter.setValueClass(Integer.class);
+				formatter.setMinimum(Integer.MIN_VALUE);
+				formatter.setMaximum(Integer.MAX_VALUE);
+				formatter.setAllowsInvalid(false);
+				field = new JFormattedTextField(formatter);
+
+				break;
+			case "double":
+			case "Double":
+				format.setMinimumFractionDigits(1);
+				format.setMaximumFractionDigits(5);
+				formatter.setValueClass(Double.class);
+				formatter.setMinimum(Double.MIN_VALUE);
+				formatter.setMaximum(Double.MAX_VALUE);
+				formatter.setAllowsInvalid(false);
+				field = new JFormattedTextField(formatter);
+				break;
+			case "float":
+			case "Float":
+				format.setMinimumFractionDigits(1);
+				format.setMaximumFractionDigits(5);
+				formatter.setValueClass(Float.class);
+				formatter.setMinimum(Float.MIN_VALUE);
+				formatter.setMaximum(Float.MAX_VALUE);
+				formatter.setAllowsInvalid(false);
+				field = new JFormattedTextField(formatter);
+
+				break;
+			case "short":
+			case "Short":
+				formatter.setValueClass(Short.class);
+				formatter.setMinimum(Short.MIN_VALUE);
+				formatter.setMaximum(Short.MAX_VALUE);
+				formatter.setAllowsInvalid(false);
+				field = new JFormattedTextField(formatter);
+				break;
+			case "byte":
+			case "Byte":
+				formatter.setValueClass(Byte.class);
+				formatter.setMinimum(Byte.MIN_VALUE);
+				formatter.setMaximum(Byte.MAX_VALUE);
+				formatter.setAllowsInvalid(false);
+				field = new JFormattedTextField(formatter);
+				break;
+			case "boolean":
+			case "Boolean":
+				Vector<Boolean> item = new Vector<Boolean>();
+				item.add(Boolean.TRUE);
+				item.add(Boolean.FALSE);
+				field = new JComboBox<Boolean>(item);
+				break;
+			case "long":
+			case "Long":
+				formatter.setValueClass(Long.class);
+				formatter.setMinimum(Long.MIN_VALUE);
+				formatter.setMaximum(Long.MAX_VALUE);
+				formatter.setAllowsInvalid(false);
+				field = new JFormattedTextField(formatter);
+				break;
+			default:
+				System.out.println("Error");
+		}
+
+		label.setLabelFor(field);
+		panel.add(label);
+		field.setPreferredSize(new Dimension(100, 20));
+
+		panel.add(field);
+		contentPane.add(panel);
+	}
 }

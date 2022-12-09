@@ -28,6 +28,8 @@ public class ServerThread extends Thread {
 			InputStream is = this.client.getInputStream();
 			ObjectInputStream ois = new ObjectInputStream(is);
 
+			Object obj = null;
+
 			// lock the list
 			synchronized (sentList) {
 
@@ -40,23 +42,34 @@ public class ServerThread extends Thread {
 					this.interrupt();
 				} else {
 
-					Object obj = sentList.get(sentList.size() - 1);
+					obj = sentList.get(sentList.size() - 1);
 					sentList.remove(sentList.get(sentList.size() - 1));
-					oos.writeObject(obj);
 				}
+			}
+			if (obj == null) {
+				System.out.println("Sending disconnect message to client.");
+				String disco = "please disconnect";
+				oos.writeObject(disco);
+				client.close();
+			} else {
+				System.out.println("Sending object and list.");
+				oos.writeObject(obj);
 			}
 
 			// check if thread is interrupted
 			if (!this.isInterrupted()) {
+				System.out.println("Recieving object from client...");
+				obj = ois.readObject();
+				System.out.println("Object recieved.");
+
 				synchronized (receiveList) {
-					Object obj = ois.readObject();
-					System.out.println("Adding object to list...\n" + obj);
+					System.out.println("Adding objectto list" + obj);
 					receiveList.add(obj);
 				}
 			}
-
 			// close
 			client.close();
+
 		} catch (IOException | ClassNotFoundException e) {
 
 			e.printStackTrace();

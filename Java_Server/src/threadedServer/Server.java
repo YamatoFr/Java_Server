@@ -13,8 +13,7 @@ import java.util.*;
 class Server {
 
 	// Attributes
-	protected int serverPort = 8080;
-	protected ServerSocket serverSocket = null;
+	protected int serverPort = 50262;
 
 	private String name;
 	private String ip;
@@ -25,7 +24,7 @@ class Server {
 	private static ArrayList<Object> receivedList = new ArrayList<>();
 
 	public static void main(String[] args) {
-		Server serverZero = new Server("Server 0", "127.0.0.1", 8080, "HTTP");
+		Server serverZero = new Server("Server 0", "127.0.0.1", 50262, "HTTP");
 
 		serverZero.displayInfo();
 		serverZero.listen();
@@ -51,7 +50,7 @@ class Server {
 	public void listen() {
 		ServerSocket sock;
 
-		for (int i = 0; i < 6; i++) {
+		for (int i = 0; i < 20; i++) {
 			Form form = new Form();
 
 			sentList.add(form);
